@@ -2,7 +2,7 @@ package ru.javawebinar.topjava.model;
 
 import java.time.LocalDateTime;
 
-public class пшеUserMealWithExcess {
+public class UserMealWithExcess {
     private final LocalDateTime dateTime;
 
     private final String description;

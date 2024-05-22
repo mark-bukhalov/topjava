@@ -28,7 +28,7 @@ public class MemoryMealDao implements MealDao {
 
     @Override
     public Meal get(int id) {
-        return meals.getOrDefault(id, null);
+        return meals.get(id);
     }
 
     @Override

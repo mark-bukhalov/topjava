@@ -40,8 +40,10 @@ public class MealServlet extends HttpServlet {
                 req.getRequestDispatcher("meal.jsp").forward(req, resp);
                 break;
             case ("insert"):
+                Meal meal = new Meal();
+                meal.setDateTime(LocalDateTime.now());
                 req.setAttribute("action", "insert");
-                req.setAttribute("meal", new Meal());
+                req.setAttribute("meal", meal);
                 req.getRequestDispatcher("meal.jsp").forward(req, resp);
             case ("all"):
                 req.setAttribute("meals", MealsUtil.filteredByStreams(mealDao.getAll(), LocalTime.MIN, LocalTime.MAX,

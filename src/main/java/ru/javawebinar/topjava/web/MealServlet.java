@@ -13,13 +13,14 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class MealServlet extends HttpServlet {
     private static final int CALORIES_PER_DAY = 1500;
     private static final MealDao mealDao = new MemoryMealDao();
-    private static final Logger log = getLogger(UserServlet.class);
+    private static final Logger log = getLogger(MealServlet.class);
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -29,26 +30,24 @@ public class MealServlet extends HttpServlet {
 
         switch (action == null ? "all" : action.toLowerCase()) {
             case ("delete"):
-                int id = Integer.parseInt(req.getParameter("id"));
+                int id = getId(req);
                 mealDao.delete(id);
                 resp.sendRedirect(req.getContextPath() + "/meals");
                 log.debug("delete id:{}", id);
                 break;
             case ("edit"):
-                req.setAttribute("action", "edit");
-                req.setAttribute("meal", mealDao.get(Integer.parseInt(req.getParameter("id"))));
-                req.getRequestDispatcher("meal.jsp").forward(req, resp);
+                req.setAttribute("meal", mealDao.get(getId(req)));
+                req.getRequestDispatcher("/meal.jsp").forward(req, resp);
                 break;
             case ("insert"):
-                Meal meal = new Meal();
-                meal.setDateTime(LocalDateTime.now());
-                req.setAttribute("action", "insert");
+                Meal meal = new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 0);
                 req.setAttribute("meal", meal);
-                req.getRequestDispatcher("meal.jsp").forward(req, resp);
+                req.getRequestDispatcher("/meal.jsp").forward(req, resp);
+                break;
             case ("all"):
                 req.setAttribute("meals", MealsUtil.filteredByStreams(mealDao.getAll(), LocalTime.MIN, LocalTime.MAX,
                         CALORIES_PER_DAY));
-                req.getRequestDispatcher("meals.jsp").forward(req, resp);
+                req.getRequestDispatcher("/meals.jsp").forward(req, resp);
                 log.debug("Get all");
                 break;
         }
@@ -75,5 +74,9 @@ public class MealServlet extends HttpServlet {
         }
 
         resp.sendRedirect(req.getContextPath() + "/meals");
+    }
+
+    private Integer getId(HttpServletRequest req) {
+        return Integer.parseInt(req.getParameter("id"));
     }
 }

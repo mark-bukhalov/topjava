@@ -19,6 +19,7 @@
 <body>
 <section>
     <h3><a href="index.html">Home</a></h3>
+    <div>Hello ${authUserId == 1 ? 'User' : 'Admin'}</div>
     <hr/>
     <h2>Meals</h2>
     <a href="meals?action=create">Add Meal</a>

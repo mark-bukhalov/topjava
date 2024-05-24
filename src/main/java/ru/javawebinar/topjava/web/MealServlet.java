@@ -72,6 +72,7 @@ public class MealServlet extends HttpServlet {
             case "all":
             default:
                 request.setAttribute("meals", restController.getAll());
+                request.setAttribute("authUserId",SecurityUtil.authUserId());
                 request.getRequestDispatcher("/meals.jsp").forward(request, response);
                 break;
         }

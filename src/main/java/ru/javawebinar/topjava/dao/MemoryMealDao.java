@@ -13,7 +13,6 @@ public class MemoryMealDao implements MealDao {
     private final Map<Integer, Meal> meals = new ConcurrentHashMap<>();
     private final AtomicInteger counter = new AtomicInteger(0);
 
-
     public MemoryMealDao() {
         MealsUtil.initMeals.forEach(this::create);
     }
@@ -37,7 +36,7 @@ public class MemoryMealDao implements MealDao {
 
     @Override
     public Meal update(Meal meal) {
-        return meals.replace(meal.getId(),meal) == null ? null : meal;
+        return meals.replace(meal.getId(), meal) == null ? null : meal;
     }
 
     @Override

@@ -45,6 +45,7 @@ public class MealServlet extends HttpServlet {
                 req.getRequestDispatcher("/meal.jsp").forward(req, resp);
                 break;
             case ("all"):
+            default:
                 req.setAttribute("meals", MealsUtil.filteredByStreams(mealDao.getAll(), LocalTime.MIN, LocalTime.MAX,
                         CALORIES_PER_DAY));
                 req.getRequestDispatcher("/meals.jsp").forward(req, resp);
@@ -76,7 +77,7 @@ public class MealServlet extends HttpServlet {
         resp.sendRedirect(req.getContextPath() + "/meals");
     }
 
-    private Integer getId(HttpServletRequest req) {
+    private int getId(HttpServletRequest req) {
         return Integer.parseInt(req.getParameter("id"));
     }
 }

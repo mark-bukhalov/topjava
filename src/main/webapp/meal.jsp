@@ -4,9 +4,10 @@
 <head>
     <title>Edit</title>
     <h3><a href="index.html">Home</a></h3>
-    <h3>${ action == "edit" ? 'Edit meal' : 'Add meal'}</h3>
+    <h3>${ param.action == "edit" ? 'Edit meal' : 'Add meal'}</h3>
 </head>
 <body>
+
 <jsp:useBean id="meal" type="ru.javawebinar.topjava.model.Meal" scope="request"/>
 <form method="POST" action='meals' name="frmAddMeal">
         <input type="hidden" name="id" value="${meal.id}"/>

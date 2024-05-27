@@ -16,9 +16,10 @@ import java.util.stream.Collectors;
 
 @Repository
 public class InMemoryMealRepository implements MealRepository {
+    private static final Logger log = LoggerFactory.getLogger(InMemoryMealRepository.class);
     private final Map<Integer, Meal> repository = new ConcurrentHashMap<>();
     private final AtomicInteger counter = new AtomicInteger(0);
-    private static final Logger log = LoggerFactory.getLogger(InMemoryMealRepository.class);
+
 
     {
         MealsUtil.meals.forEach(this::save);
@@ -39,7 +40,7 @@ public class InMemoryMealRepository implements MealRepository {
             return meal;
         }
         // handle case: update, but not present in storage
-        return repository.computeIfPresent(meal.getId(), (id, oldUser) -> meal);
+        return repository.computeIfPresent(meal.getId(), (id, oldMeal) -> meal);
     }
 
     @Override
@@ -49,25 +50,12 @@ public class InMemoryMealRepository implements MealRepository {
     }
 
     @Override
-    public List<Meal> getAll() {
-        log.info("getAll");
-        List<Meal> meals = (List<Meal>) repository.values();
-        return sortMealByDateTimeDesc(meals);
-    }
-
-    @Override
-    public List<Meal> getAllByUser(Integer userId) {
+    public List<Meal> getAll(int userId) {
         log.info("getAllByUser {}", userId);
-        List<Meal> meals = repository.values().stream()
-                .filter(value -> value.getUserID().equals(userId))
+        return repository.values().stream()
+                .filter(value -> value.getUserId().equals(userId))
+                .sorted(Comparator.comparing(Meal::getDateTime).reversed())
                 .collect(Collectors.toList());
-        return sortMealByDateTimeDesc(meals);
     }
-
-    private List<Meal> sortMealByDateTimeDesc(List<Meal> meals) {
-        meals.sort(Comparator.comparing(Meal::getDateTime).reversed());
-        return meals;
-    }
-
 }
 

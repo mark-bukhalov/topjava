@@ -43,7 +43,7 @@ public class ValidationUtil {
     }
 
     public static void userIsOwner(Meal meal, Integer userID) {
-        if (!meal.getUserID().equals(userID)) {
+        if (!meal.getUserId().equals(userID)) {
             throw new NotFoundException("Not found meal with id=" + meal.getId() + " for user id=" + userID);
         }
     }

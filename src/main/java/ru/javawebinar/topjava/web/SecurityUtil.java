@@ -7,7 +7,6 @@ public class SecurityUtil {
     public static final int ADMIN = 2;
     private static int authUserId = USER;
 
-
     public static int authUserId() {
         return authUserId;
     }

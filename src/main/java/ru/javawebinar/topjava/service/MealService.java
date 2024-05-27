@@ -16,31 +16,31 @@ public class MealService {
         this.repository = repository;
     }
 
-    public List<Meal> getAllByUser(Integer userId) {
-        return repository.getAllByUser(userId);
+    public List<Meal> getAll(int userId) {
+        return repository.getAll(userId);
     }
 
-    public Meal get(Integer mealId, Integer userId) {
+    public Meal get(int mealId, Integer userId) {
         Meal meal = ValidationUtil.checkNotFoundWithId(repository.get(mealId), mealId);
         ValidationUtil.userIsOwner(meal, userId);
         return meal;
     }
 
-    public Meal create(Meal meal, Integer userId) {
-        meal.setUserID(userId);
+    public Meal create(Meal meal, int userId) {
+        meal.setUserId(userId);
         return repository.save(meal);
     }
 
-    public void delete(Integer mealId, Integer userId) {
+    public void delete(int mealId, int userId) {
         Meal meal = ValidationUtil.checkNotFoundWithId(repository.get(mealId), mealId);
         ValidationUtil.userIsOwner(meal, userId);
         repository.delete(mealId);
     }
 
-    public void update(Meal meal, Integer userId) {
-        Meal oldMeal = ValidationUtil.checkNotFoundWithId(repository.get(meal.getId()),meal.getId());
+    public void update(Meal meal, int userId) {
+        Meal oldMeal = ValidationUtil.checkNotFoundWithId(repository.get(meal.getId()), meal.getId());
         ValidationUtil.userIsOwner(oldMeal, userId);
-        meal.setUserID(userId);
+        meal.setUserId(userId);
         repository.save(meal);
     }
 }

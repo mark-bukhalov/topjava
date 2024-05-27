@@ -14,8 +14,8 @@ import java.util.List;
 
 @Controller
 public class MealRestController {
-    private final MealService service;
     private static final Logger log = LoggerFactory.getLogger(MealRestController.class);
+    private final MealService service;
 
     public MealRestController(MealService service) {
         this.service = service;
@@ -23,10 +23,10 @@ public class MealRestController {
 
     public List<MealTo> getAll() {
         log.info("getAll");
-        return MealsUtil.getTos(service.getAllByUser(SecurityUtil.authUserId()), MealsUtil.DEFAULT_CALORIES_PER_DAY);
+        return MealsUtil.getTos(service.getAll(SecurityUtil.authUserId()), SecurityUtil.authUserCaloriesPerDay());
     }
 
-    public Meal get(Integer mealId) {
+    public Meal get(int mealId) {
         log.info("get {}", mealId);
         return service.get(mealId, SecurityUtil.authUserId());
     }
@@ -37,12 +37,12 @@ public class MealRestController {
         return service.create(meal, SecurityUtil.authUserId());
     }
 
-    public void delete(Integer mealId) {
+    public void delete(int mealId) {
         log.info("delete {}", mealId);
         service.delete(mealId, SecurityUtil.authUserId());
     }
 
-    public void update(Integer mealId, Meal meal) {
+    public void update(int mealId, Meal meal) {
         log.info("update {} with id={}", meal, mealId);
         ValidationUtil.assureIdConsistent(meal, mealId);
         service.update(meal, SecurityUtil.authUserId());

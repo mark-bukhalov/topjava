@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.repository.UserRepository;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -14,9 +15,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Repository
 public class InMemoryUserRepository implements UserRepository {
+    private static final Logger log = LoggerFactory.getLogger(InMemoryUserRepository.class);
     private final Map<Integer, User> repository = new ConcurrentHashMap<>();
     private final AtomicInteger counter = new AtomicInteger(0);
-    private static final Logger log = LoggerFactory.getLogger(InMemoryUserRepository.class);
 
     @Override
     public boolean delete(int id) {
@@ -44,7 +45,7 @@ public class InMemoryUserRepository implements UserRepository {
     @Override
     public List<User> getAll() {
         log.info("getAll");
-        List<User> users = (List<User>) repository.values();
+        List<User> users = new ArrayList<>(repository.values());
         users.sort(Comparator.comparing(User::getName).thenComparing(User::getEmail));
         return users;
     }
@@ -52,10 +53,9 @@ public class InMemoryUserRepository implements UserRepository {
     @Override
     public User getByEmail(String email) {
         log.info("getByEmail {}", email);
-        return repository.entrySet().stream()
-                .filter(entry -> entry.getValue().getEmail().equals(email))
+        return repository.values().stream()
+                .filter(entry -> entry.getEmail().equals(email))
                 .findFirst()
-                .get()
-                .getValue();
+                .orElse(null);
     }
 }

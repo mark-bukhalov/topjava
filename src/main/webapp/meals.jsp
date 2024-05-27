@@ -22,6 +22,32 @@
     <div>Hello ${authUserId == 1 ? 'User' : 'Admin'}</div>
     <hr/>
     <h2>Meals</h2>
+    <hr/>
+    <form method="get" action="meals">
+        <input type="hidden" name="action" value="filter">
+        <dl>
+            <dt>Start Date:</dt>
+            <dd><input type="date" value="${param.startDate}" name="startDate"></dd>
+        </dl>
+
+        <dl>
+            <dt>End date:</dt>
+            <dd><input type="date" value="${param.endDate}" name="endDate"></dd>
+        </dl>
+
+        <dl>
+            <dt>Start time:</dt>
+            <dd><input type="time" value="${param.startTime}" name="startTime"></dd>
+        </dl>
+
+        <dl>
+            <dt>End time:</dt>
+            <dd><input type="time" value="${param.endTime}" name="endTime"></dd>
+        </dl>
+
+        <button type="submit">Filter</button>
+    </form>
+    <hr/>
     <a href="meals?action=create">Add Meal</a>
     <br><br>
     <table border="1" cellpadding="8" cellspacing="0">

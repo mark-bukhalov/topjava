@@ -10,9 +10,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
+import java.util.function.Function;
 
 public class MealServlet extends HttpServlet {
     private ConfigurableApplicationContext appCtx;
@@ -66,6 +69,19 @@ public class MealServlet extends HttpServlet {
                 request.setAttribute("meal", meal);
                 request.getRequestDispatcher("/mealForm.jsp").forward(request, response);
                 break;
+            case "filter":
+                LocalDate startDate = parseParamOrDefault(request.getParameter("startDate"),
+                        LocalDate::parse, LocalDate.MIN);
+                LocalDate endDate = parseParamOrDefault(request.getParameter("endDate"),
+                        LocalDate::parse, LocalDate.MAX);
+                LocalTime startTime = parseParamOrDefault(request.getParameter("startTime"),
+                        LocalTime::parse, LocalTime.MIN);
+                LocalTime endTime = parseParamOrDefault(request.getParameter("endTime"),
+                        LocalTime::parse, LocalTime.MAX);
+
+                request.setAttribute("meals", restController.getFilteredAll(startDate, endDate, startTime, endTime));
+                request.getRequestDispatcher("/meals.jsp").forward(request, response);
+                break;
             case "all":
             default:
                 request.setAttribute("meals", restController.getAll());
@@ -78,5 +94,13 @@ public class MealServlet extends HttpServlet {
     private int getId(HttpServletRequest request) {
         String paramId = Objects.requireNonNull(request.getParameter("id"));
         return Integer.parseInt(paramId);
+    }
+
+    private <R> R parseParamOrDefault(String param, Function<String, R> parser, R defaultValue) {
+        if (param.isEmpty()) {
+            return defaultValue;
+        } else {
+            return parser.apply(param);
+        }
     }
 }

@@ -21,26 +21,18 @@ public class MealService {
     }
 
     public Meal get(int mealId, Integer userId) {
-        Meal meal = ValidationUtil.checkNotFoundWithId(repository.get(mealId), mealId);
-        ValidationUtil.userIsOwner(meal, userId);
-        return meal;
+        return ValidationUtil.checkNotFoundWithId(repository.get(mealId, userId), mealId);
     }
 
     public Meal create(Meal meal, int userId) {
-        meal.setUserId(userId);
-        return repository.save(meal);
+        return repository.save(meal, userId);
     }
 
     public void delete(int mealId, int userId) {
-        Meal meal = ValidationUtil.checkNotFoundWithId(repository.get(mealId), mealId);
-        ValidationUtil.userIsOwner(meal, userId);
-        repository.delete(mealId);
+        ValidationUtil.checkNotFoundWithId(repository.delete(mealId, userId), mealId);
     }
 
     public void update(Meal meal, int userId) {
-        Meal oldMeal = ValidationUtil.checkNotFoundWithId(repository.get(meal.getId()), meal.getId());
-        ValidationUtil.userIsOwner(oldMeal, userId);
-        meal.setUserId(userId);
-        repository.save(meal);
+        ValidationUtil.checkNotFoundWithId(repository.save(meal, userId), meal.getId());
     }
 }

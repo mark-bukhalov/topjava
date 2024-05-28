@@ -6,13 +6,13 @@ import org.springframework.stereotype.Controller;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.service.MealService;
 import ru.javawebinar.topjava.to.MealTo;
-import ru.javawebinar.topjava.util.MealsUtil;
 import ru.javawebinar.topjava.util.ValidationUtil;
 import ru.javawebinar.topjava.web.SecurityUtil;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 public class MealRestController {
@@ -25,12 +25,18 @@ public class MealRestController {
 
     public List<MealTo> getAll() {
         log.info("getAll");
-        return MealsUtil.getTos(service.getAll(SecurityUtil.authUserId()), SecurityUtil.authUserCaloriesPerDay());
+        return service.getAll(SecurityUtil.authUserId(), SecurityUtil.authUserCaloriesPerDay());
     }
 
     public List<MealTo> getFilteredAll(LocalDate startDate, LocalDate endDate, LocalTime startTime, LocalTime endTime) {
         log.info("getAllFilter {} {} {} {}", startDate, endDate, startTime, endTime);
-        return service.getFilteredAll(SecurityUtil.authUserId(), SecurityUtil.authUserCaloriesPerDay(), startDate, endDate, startTime, endTime);
+
+        return service.getFilteredAll(SecurityUtil.authUserId(),
+                SecurityUtil.authUserCaloriesPerDay(),
+                Optional.ofNullable(startDate).orElse(LocalDate.MIN),
+                Optional.ofNullable(endDate).orElse(LocalDate.MAX),
+                Optional.ofNullable(startTime).orElse(LocalTime.MIN),
+                Optional.ofNullable(endTime).orElse(LocalTime.MAX));
     }
 
     public Meal get(int mealId) {

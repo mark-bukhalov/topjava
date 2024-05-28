@@ -70,14 +70,10 @@ public class MealServlet extends HttpServlet {
                 request.getRequestDispatcher("/mealForm.jsp").forward(request, response);
                 break;
             case "filter":
-                LocalDate startDate = parseParamOrDefault(request.getParameter("startDate"),
-                        LocalDate::parse, LocalDate.MIN);
-                LocalDate endDate = parseParamOrDefault(request.getParameter("endDate"),
-                        LocalDate::parse, LocalDate.MAX);
-                LocalTime startTime = parseParamOrDefault(request.getParameter("startTime"),
-                        LocalTime::parse, LocalTime.MIN);
-                LocalTime endTime = parseParamOrDefault(request.getParameter("endTime"),
-                        LocalTime::parse, LocalTime.MAX);
+                LocalDate startDate = parseParamOrNull(request.getParameter("startDate"), LocalDate::parse);
+                LocalDate endDate = parseParamOrNull(request.getParameter("endDate"), LocalDate::parse);
+                LocalTime startTime = parseParamOrNull(request.getParameter("startTime"), LocalTime::parse);
+                LocalTime endTime = parseParamOrNull(request.getParameter("endTime"), LocalTime::parse);
 
                 request.setAttribute("meals", restController.getFilteredAll(startDate, endDate, startTime, endTime));
                 request.getRequestDispatcher("/meals.jsp").forward(request, response);
@@ -96,9 +92,9 @@ public class MealServlet extends HttpServlet {
         return Integer.parseInt(paramId);
     }
 
-    private <R> R parseParamOrDefault(String param, Function<String, R> parser, R defaultValue) {
+    private <R> R parseParamOrNull(String param, Function<String, R> parser) {
         if (param.isEmpty()) {
-            return defaultValue;
+            return null;
         } else {
             return parser.apply(param);
         }

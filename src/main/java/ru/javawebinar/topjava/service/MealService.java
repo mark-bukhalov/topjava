@@ -20,8 +20,8 @@ public class MealService {
         this.repository = repository;
     }
 
-    public List<Meal> getAll(int userId) {
-        return repository.getAll(userId);
+    public List<MealTo> getAll(int userId, int caloriesPerDay) {
+        return MealsUtil.getTos(repository.getAll(userId), caloriesPerDay);
     }
 
     public List<MealTo> getFilteredAll(int userId, int caloriesPerDay, LocalDate startDate, LocalDate endDate, LocalTime startTime, LocalTime endTime) {

@@ -7,9 +7,10 @@ import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
 import ru.javawebinar.topjava.util.DateTimeUtil;
 import ru.javawebinar.topjava.util.MealsUtil;
+import ru.javawebinar.topjava.web.SecurityUtil;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +25,7 @@ public class InMemoryMealRepository implements MealRepository {
     private final AtomicInteger counter = new AtomicInteger(0);
 
     {
-        MealsUtil.meals.forEach(meal -> this.save(meal, meal.getUserId()));
+        MealsUtil.meals.forEach(meal -> this.save(meal, SecurityUtil.USER));
     }
 
     @Override
@@ -41,12 +42,13 @@ public class InMemoryMealRepository implements MealRepository {
 
         if (meal.isNew()) {
             meal.setId(counter.incrementAndGet());
-            repository.putIfAbsent(userId, new ConcurrentHashMap<>());
-            return repository.get(userId).put(meal.getId(), meal);
+            Map<Integer, Meal> userRep = repository.computeIfAbsent(userId, k -> new ConcurrentHashMap<>());
+            userRep.put(meal.getId(), meal);
+            return meal;
         }
 
-        Map<Integer, Meal> userRep = repository.get(userId);
-        return userRep == null ? null : userRep.replace(meal.getId(), meal);
+        Map<Integer, Meal> userRep = getUserRep(userId);
+        return userRep == null ? null : userRep.computeIfPresent(meal.getId(), (id, oldMeal) -> meal);
     }
 
     @Override
@@ -64,7 +66,7 @@ public class InMemoryMealRepository implements MealRepository {
         Map<Integer, Meal> userRep = getUserRep(userId);
 
         if (userRep == null) {
-            return new ArrayList<>();
+            return Collections.emptyList();
         } else {
             return userRep.values().stream()
                     .sorted(Comparator.comparing(Meal::getDateTime).reversed())
@@ -76,16 +78,10 @@ public class InMemoryMealRepository implements MealRepository {
     public List<Meal> getDateFilteredAll(int userId, LocalDate startDate, LocalDate endDate) {
         log.info("getDateFilteredAll {} {} {}", userId, startDate, endDate);
 
-        Map<Integer, Meal> userRep = getUserRep(userId);
+        return getAll(userId).stream()
+                .filter(value -> DateTimeUtil.isBetweenHalfOpen(value.getDate(), startDate, endDate == LocalDate.MAX ? endDate : endDate.plusDays(1)))
+                .collect(Collectors.toList());
 
-        if (userRep == null) {
-            return new ArrayList<>();
-        } else {
-            return userRep.values().stream()
-                    .filter(value -> DateTimeUtil.isBetweenHalfOpen(value.getDate(), startDate, endDate))
-                    .sorted(Comparator.comparing(Meal::getDateTime).reversed())
-                    .collect(Collectors.toList());
-        }
     }
 
     private Map<Integer, Meal> getUserRep(int userId) {

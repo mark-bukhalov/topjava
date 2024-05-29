@@ -5,9 +5,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
+import ru.javawebinar.topjava.util.DateTimeUtil;
 import ru.javawebinar.topjava.util.MealsUtil;
 import ru.javawebinar.topjava.web.SecurityUtil;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -24,7 +26,8 @@ public class InMemoryMealRepository implements MealRepository {
     private final AtomicInteger counter = new AtomicInteger(0);
 
     {
-        MealsUtil.meals.forEach(meal -> this.save(meal, meal.getDescription().contains("[USER]") ? SecurityUtil.USER : SecurityUtil.ADMIN));
+        MealsUtil.userMeals.forEach(meal -> this.save(meal, SecurityUtil.USER));
+        MealsUtil.adminMeals.forEach(meal -> this.save(meal, SecurityUtil.ADMIN));
     }
 
     @Override
@@ -61,13 +64,22 @@ public class InMemoryMealRepository implements MealRepository {
     @Override
     public List<Meal> getAll(int userId) {
         log.info("getAll {}", userId);
-        return getDateFilteredAll(userId, meal -> true);
+        return getPredicateAll(userId, meal -> true);
     }
 
     @Override
-    public List<Meal> getDateFilteredAll(int userId, Predicate<Meal> filter) {
+    public List<Meal> getDateFilteredAll(int userId, LocalDate startDate, LocalDate endDate) {
         log.info("getDateFilteredAll {}", userId);
+        return getPredicateAll(userId, meal -> DateTimeUtil.isBetweenHalfOpen(
+                meal.getDate(), startDate, endDate == LocalDate.MAX ? endDate : endDate.plusDays(1)));
+    }
 
+    private Map<Integer, Meal> getUserRep(int userId) {
+        return repository.get(userId);
+    }
+
+    private List<Meal> getPredicateAll(int userId, Predicate<Meal> filter) {
+        log.info("getDateFilteredAll {}", userId);
         Map<Integer, Meal> userRep = getUserRep(userId);
 
         if (userRep == null) {
@@ -78,10 +90,6 @@ public class InMemoryMealRepository implements MealRepository {
                     .sorted(Comparator.comparing(Meal::getDateTime).reversed())
                     .collect(Collectors.toList());
         }
-    }
-
-    private Map<Integer, Meal> getUserRep(int userId) {
-        return repository.get(userId);
     }
 }
 

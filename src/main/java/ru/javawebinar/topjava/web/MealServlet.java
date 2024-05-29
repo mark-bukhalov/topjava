@@ -76,6 +76,7 @@ public class MealServlet extends HttpServlet {
                 LocalTime endTime = parseParamOrNull(request.getParameter("endTime"), LocalTime::parse);
 
                 request.setAttribute("meals", restController.getFilteredAll(startDate, endDate, startTime, endTime));
+                request.setAttribute("authUserId", SecurityUtil.authUserId());
                 request.getRequestDispatcher("/meals.jsp").forward(request, response);
                 break;
             case "all":

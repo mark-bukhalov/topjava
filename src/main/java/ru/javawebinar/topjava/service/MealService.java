@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
 import ru.javawebinar.topjava.to.MealTo;
+import ru.javawebinar.topjava.util.DateTimeUtil;
 import ru.javawebinar.topjava.util.MealsUtil;
 import ru.javawebinar.topjava.util.ValidationUtil;
 
@@ -25,7 +26,12 @@ public class MealService {
     }
 
     public List<MealTo> getFilteredAll(int userId, int caloriesPerDay, LocalDate startDate, LocalDate endDate, LocalTime startTime, LocalTime endTime) {
-        return MealsUtil.getFilteredTos(repository.getDateFilteredAll(userId, startDate, endDate), caloriesPerDay, startTime, endTime);
+        return MealsUtil.getFilteredTos(repository.getDateFilteredAll(userId,
+                        meal -> DateTimeUtil.isBetweenHalfOpen(meal.getDate(),
+                                startDate, endDate == LocalDate.MAX ? endDate : endDate.plusDays(1))),
+                caloriesPerDay,
+                startTime,
+                endTime);
     }
 
     public Meal get(int mealId, int userId) {

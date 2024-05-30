@@ -1,5 +1,9 @@
-DELETE FROM user_role;
-DELETE FROM users;
+DELETE
+FROM user_role
+WHERE user_id is not null;
+DELETE
+FROM users
+where id is not null;
 ALTER SEQUENCE global_seq RESTART WITH 100000;
 
 INSERT INTO users (name, email, password)

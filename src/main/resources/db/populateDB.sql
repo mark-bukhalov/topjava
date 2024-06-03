@@ -1,14 +1,11 @@
 DELETE
-FROM user_role
-WHERE user_id is not null;
+FROM user_role;
 
 DELETE
-FROM users
-where id is not null;
+FROM users;
 
 DELETE
-FROM meals
-where id is not null;
+FROM meals;
 
 ALTER SEQUENCE global_seq RESTART WITH 100000;
 

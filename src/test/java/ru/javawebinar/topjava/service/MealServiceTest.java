@@ -13,7 +13,6 @@ import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.Assert.assertThrows;
@@ -47,9 +46,19 @@ public class MealServiceTest {
     }
 
     @Test
+    public void getNotExist() {
+        assertThrows(NotFoundException.class, () -> service.get(NOT_EXIST_MEAL_ID, ADMIN_ID));
+    }
+
+    @Test
     public void delete() {
         service.delete(adminMeal1.getId(), ADMIN_ID);
         assertThrows(NotFoundException.class, () -> service.get(adminMeal1.getId(), ADMIN_ID));
+    }
+
+    @Test
+    public void deleteNotExist() {
+        assertThrows(NotFoundException.class, () -> service.delete(NOT_EXIST_MEAL_ID, USER_ID));
     }
 
     @Test
@@ -73,7 +82,7 @@ public class MealServiceTest {
     public void update() {
         Meal updateMeal = getUpdated();
         service.update(updateMeal, USER_ID);
-        assertMatch(service.get(updateMeal.getId(), USER_ID), updateMeal);
+        assertMatch(service.get(updateMeal.getId(), USER_ID), getUpdated());
     }
 
     @Test
@@ -84,9 +93,8 @@ public class MealServiceTest {
 
     @Test
     public void create() {
-        Meal newMeal = new Meal(LocalDateTime.of(2024, 5, 4, 13, 0), "NEW", 999);
-
-        Meal createdMeal = service.create(newMeal, USER_ID);
+        Meal createdMeal = service.create(getNew(), USER_ID);
+        Meal newMeal = getNew();
         newMeal.setId(createdMeal.getId());
         assertMatch(createdMeal, newMeal);
         assertMatch(service.get(createdMeal.getId(), USER_ID), newMeal);

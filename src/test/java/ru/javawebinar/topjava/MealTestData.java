@@ -21,12 +21,18 @@ public class MealTestData {
     public static final Meal adminMeal3 = new Meal(START_SEQ + 9, LocalDateTime.of(2020, Month.JANUARY, 31, 13, 0), "Обед [Admin]", 500);
     public static final Meal adminMeal4 = new Meal(START_SEQ + 10, LocalDateTime.of(2020, Month.JANUARY, 31, 20, 0), "Ужин [Admin]", 410);
 
+    public static final int NOT_EXIST_MEAL_ID = 999999;
+
     public static Meal getUpdated() {
         Meal updateMeal = new Meal(userMeal1);
         updateMeal.setDateTime(LocalDateTime.of(2024, 5, 4, 13, 0));
         updateMeal.setDescription("update desc");
         updateMeal.setCalories(999);
         return updateMeal;
+    }
+
+    public static Meal getNew() {
+        return new Meal(LocalDateTime.of(2024, 5, 4, 13, 0), "NEW", 999);
     }
 
     public static void assertMatch(Meal actual, Meal expected) {

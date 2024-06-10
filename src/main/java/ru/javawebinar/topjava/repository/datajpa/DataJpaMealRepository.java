@@ -56,11 +56,21 @@ public class DataJpaMealRepository implements MealRepository {
 
     @Override
     public Meal getWithUser(int id, int userId) {
-        Meal meal = get(id, userId);
-        if (meal == null) {
-            return null;
-        }
-        meal.getUser().getName();
-        return meal;
+        return crudRepository.getWithUser(id, userId);
+
+//        Изначально сделал таким образом, но тут возникла проблема в тестах, т как Hibernate делает прокси класс
+//        field/property 'user' differ:
+//        - actual value  : User {id=100000, email=user@yandex.ru, name=User, enabled=true, roles=[USER], caloriesPerDay=2000} (User$HibernateProxy$TrFYjrSE@3b80bb63)
+//        - expected value: User{id=100000, email=user@yandex.ru, name=User, enabled=true, roles=[USER], caloriesPerDay=2000} (User@17ebbf1e)
+
+//        UPD решил проблему с прокси через meal.setUser(Hibernate.unproxy(meal.getUser(),User.class));
+//        Решил оставить решение через return crudRepository.getWithUser(id, userId);
+
+//        Meal meal = get(id, userId);
+//        if (meal == null) {
+//            return null;
+//        }
+//        meal.getUser().getName();
+//        return meal;
     }
 }

@@ -53,6 +53,7 @@ public class SpringMain {
             Meal withUser = mealRepository.getWithUser(MEAL1_ID, USER_ID);
             System.out.println(withUser);
             System.out.println(withUser.getUser());
+            System.out.println(withUser.getUser().getRoles().hashCode());
 
         }
     }

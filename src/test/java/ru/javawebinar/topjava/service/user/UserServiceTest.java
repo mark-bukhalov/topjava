@@ -21,7 +21,7 @@ import static ru.javawebinar.topjava.UserTestData.*;
 
 
 @ActiveProfiles(resolver = ActiveDbProfileResolver.class)
-public class UserServiceTest extends ServiceTest {
+public abstract class UserServiceTest extends ServiceTest {
 
     @Autowired
     private UserService service;

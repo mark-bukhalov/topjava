@@ -4,11 +4,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import ru.javawebinar.topjava.model.Meal;
-import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.repository.MealRepository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -16,19 +13,20 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class DataJpaMealRepository implements MealRepository {
     private static final Sort SORT_DATETIME = Sort.by(Sort.Direction.DESC, "dateTime");
-    private final CrudMealRepository crudRepository;
-    @PersistenceContext
-    private EntityManager em;
 
-    public DataJpaMealRepository(CrudMealRepository crudRepository) {
+    private final CrudMealRepository crudRepository;
+    private final CrudUserRepository userRepository;
+
+    public DataJpaMealRepository(CrudMealRepository crudRepository, CrudUserRepository userRepository) {
         this.crudRepository = crudRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
     @Transactional
     public Meal save(Meal meal, int userId) {
         if (meal.isNew() || get(meal.getId(), userId) != null) {
-            meal.setUser(em.getReference(User.class, userId));
+            meal.setUser(userRepository.getReferenceById(userId));
             return crudRepository.save(meal);
         } else {
             return null;
@@ -54,5 +52,15 @@ public class DataJpaMealRepository implements MealRepository {
     @Override
     public List<Meal> getBetweenHalfOpen(LocalDateTime startDateTime, LocalDateTime endDateTime, int userId) {
         return crudRepository.getAllByUserIdAndDateTimeGreaterThanEqualAndDateTimeLessThan(userId, startDateTime, endDateTime, SORT_DATETIME);
+    }
+
+    @Override
+    public Meal getWithUser(int id, int userId) {
+        Meal meal = get(id, userId);
+        if (meal == null) {
+            return null;
+        }
+        meal.getUser().getName();
+        return meal;
     }
 }

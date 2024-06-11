@@ -6,19 +6,17 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.javawebinar.topjava.Profiles;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @Repository
-@Profile(Profiles.HSQL_DB)
-public class JdbcHsqldbMealRepository extends JdbcMealRepositoryAbstract {
-
-    public JdbcHsqldbMealRepository(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+@Profile(Profiles.POSTGRES_DB)
+public class PostgresJdbcMealRepository extends AbstractJdbcMealRepository {
+    public PostgresJdbcMealRepository(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         super(jdbcTemplate, namedParameterJdbcTemplate);
     }
 
     @Override
-    protected Timestamp formatingTime(LocalDateTime dateTime) {
-        return Timestamp.valueOf(dateTime);
+    protected LocalDateTime formatDateTime(LocalDateTime dateTime) {
+        return dateTime;
     }
 }

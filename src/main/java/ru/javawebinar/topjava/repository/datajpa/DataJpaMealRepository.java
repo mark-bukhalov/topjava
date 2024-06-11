@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-@Transactional(readOnly = true)
 public class DataJpaMealRepository implements MealRepository {
     private static final Sort SORT_DATETIME = Sort.by(Sort.Direction.DESC, "dateTime");
 
@@ -34,24 +33,23 @@ public class DataJpaMealRepository implements MealRepository {
     }
 
     @Override
-    @Transactional //https://stackoverflow.com/a/58861890
     public boolean delete(int id, int userId) {
-        return crudRepository.deleteMealByIdAndUserId(id, userId) != 0;
+        return crudRepository.deleteMealByIdAndUser(id, userRepository.getReferenceById(userId)) != 0;
     }
 
     @Override
     public Meal get(int id, int userId) {
-        return crudRepository.getByIdAndUserId(id, userId);
+        return crudRepository.getByIdAndUser(id, userRepository.getReferenceById(userId));
     }
 
     @Override
     public List<Meal> getAll(int userId) {
-        return crudRepository.getAllByUserId(userId, SORT_DATETIME);
+        return crudRepository.getAllByUser(userRepository.getReferenceById(userId), SORT_DATETIME);
     }
 
     @Override
     public List<Meal> getBetweenHalfOpen(LocalDateTime startDateTime, LocalDateTime endDateTime, int userId) {
-        return crudRepository.getAllByUserIdAndDateTimeGreaterThanEqualAndDateTimeLessThan(userId, startDateTime, endDateTime, SORT_DATETIME);
+        return crudRepository.getBetweenHalfOpen(userId, startDateTime, endDateTime);
     }
 
     @Override
@@ -65,6 +63,8 @@ public class DataJpaMealRepository implements MealRepository {
 
 //        UPD решил проблему с прокси через meal.setUser(Hibernate.unproxy(meal.getUser(),User.class));
 //        Решил оставить решение через return crudRepository.getWithUser(id, userId);
+
+//        Есть еще вариант с meal.setUser(userRepository.get(userId)).
 
 //        Meal meal = get(id, userId);
 //        if (meal == null) {

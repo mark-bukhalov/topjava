@@ -9,7 +9,6 @@ import ru.javawebinar.topjava.repository.UserRepository;
 import java.util.List;
 
 @Repository
-@Transactional
 public class DataJpaUserRepository implements UserRepository {
     private static final Sort SORT_NAME_EMAIL = Sort.by(Sort.Direction.ASC, "name", "email");
 
@@ -44,6 +43,7 @@ public class DataJpaUserRepository implements UserRepository {
         return crudRepository.findAll(SORT_NAME_EMAIL);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public User getWithMeals(int id) {
         User user = crudRepository.findById(id).orElse(null);

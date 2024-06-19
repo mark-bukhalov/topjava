@@ -13,10 +13,12 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.javawebinar.topjava.Profiles;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
+import ru.javawebinar.topjava.util.ModelValidator;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
+
 
 @Transactional(readOnly = true)
 public abstract class JdbcMealRepository<T> implements MealRepository {
@@ -29,13 +31,16 @@ public abstract class JdbcMealRepository<T> implements MealRepository {
 
     private final SimpleJdbcInsert insertMeal;
 
-    public JdbcMealRepository(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+    private final ModelValidator validator;
+
+    public JdbcMealRepository(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate, ModelValidator validator) {
         this.insertMeal = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("meal")
                 .usingGeneratedKeyColumns("id");
 
         this.jdbcTemplate = jdbcTemplate;
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+        this.validator = validator;
     }
 
     protected abstract T toDbDateTime(LocalDateTime ldt);
@@ -43,8 +48,8 @@ public abstract class JdbcMealRepository<T> implements MealRepository {
     @Repository
     @Profile(Profiles.POSTGRES_DB)
     public static class Java8JdbcMealRepository extends JdbcMealRepository<LocalDateTime> {
-        public Java8JdbcMealRepository(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
-            super(jdbcTemplate, namedParameterJdbcTemplate);
+        public Java8JdbcMealRepository(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate, ModelValidator validator) {
+            super(jdbcTemplate, namedParameterJdbcTemplate, validator);
         }
 
         @Override
@@ -56,8 +61,8 @@ public abstract class JdbcMealRepository<T> implements MealRepository {
     @Repository
     @Profile(Profiles.HSQL_DB)
     public static class TimestampJdbcMealRepository extends JdbcMealRepository<Timestamp> {
-        public TimestampJdbcMealRepository(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
-            super(jdbcTemplate, namedParameterJdbcTemplate);
+        public TimestampJdbcMealRepository(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate, ModelValidator validator) {
+            super(jdbcTemplate, namedParameterJdbcTemplate, validator);
         }
 
         @Override
@@ -65,9 +70,11 @@ public abstract class JdbcMealRepository<T> implements MealRepository {
             return Timestamp.valueOf(ldt);
         }
     }
+
     @Transactional
     @Override
     public Meal save(Meal meal, int userId) {
+        validator.validate(meal);
         MapSqlParameterSource map = new MapSqlParameterSource()
                 .addValue("id", meal.getId())
                 .addValue("description", meal.getDescription())

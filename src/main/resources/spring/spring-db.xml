@@ -93,6 +93,10 @@
               class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
             <property name="dataSource" ref="dataSource"/>
         </bean>
+
+        <bean id="modelValidator"
+              class="ru.javawebinar.topjava.util.ModelValidator">
+        </bean>
     </beans>
 
     <beans profile="jpa,datajpa">

@@ -1,6 +1,5 @@
 package ru.javawebinar.topjava.repository.jdbc;
 
-import org.springframework.context.annotation.Profile;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -10,18 +9,17 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import ru.javawebinar.topjava.Profiles;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
 import ru.javawebinar.topjava.util.ModelValidator;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
 
+@Repository
 @Transactional(readOnly = true)
-public abstract class JdbcMealRepository<T> implements MealRepository {
+public class JdbcMealRepository<T> implements MealRepository {
 
     private static final RowMapper<Meal> ROW_MAPPER = BeanPropertyRowMapper.newInstance(Meal.class);
 
@@ -43,34 +41,6 @@ public abstract class JdbcMealRepository<T> implements MealRepository {
         this.validator = validator;
     }
 
-    protected abstract T toDbDateTime(LocalDateTime ldt);
-
-    @Repository
-    @Profile(Profiles.POSTGRES_DB)
-    public static class Java8JdbcMealRepository extends JdbcMealRepository<LocalDateTime> {
-        public Java8JdbcMealRepository(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate, ModelValidator validator) {
-            super(jdbcTemplate, namedParameterJdbcTemplate, validator);
-        }
-
-        @Override
-        protected LocalDateTime toDbDateTime(LocalDateTime ldt) {
-            return ldt;
-        }
-    }
-
-    @Repository
-    @Profile(Profiles.HSQL_DB)
-    public static class TimestampJdbcMealRepository extends JdbcMealRepository<Timestamp> {
-        public TimestampJdbcMealRepository(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate, ModelValidator validator) {
-            super(jdbcTemplate, namedParameterJdbcTemplate, validator);
-        }
-
-        @Override
-        protected Timestamp toDbDateTime(LocalDateTime ldt) {
-            return Timestamp.valueOf(ldt);
-        }
-    }
-
     @Transactional
     @Override
     public Meal save(Meal meal, int userId) {
@@ -79,7 +49,7 @@ public abstract class JdbcMealRepository<T> implements MealRepository {
                 .addValue("id", meal.getId())
                 .addValue("description", meal.getDescription())
                 .addValue("calories", meal.getCalories())
-                .addValue("date_time", toDbDateTime(meal.getDateTime()))
+                .addValue("date_time", meal.getDateTime())
                 .addValue("user_id", userId);
 
         if (meal.isNew()) {
@@ -119,6 +89,6 @@ public abstract class JdbcMealRepository<T> implements MealRepository {
     public List<Meal> getBetweenHalfOpen(LocalDateTime startDateTime, LocalDateTime endDateTime, int userId) {
         return jdbcTemplate.query(
                 "SELECT * FROM meal WHERE user_id=?  AND date_time >=  ? AND date_time < ? ORDER BY date_time DESC",
-                ROW_MAPPER, userId, toDbDateTime(startDateTime), toDbDateTime(endDateTime));
+                ROW_MAPPER, userId, startDateTime, endDateTime);
     }
 }

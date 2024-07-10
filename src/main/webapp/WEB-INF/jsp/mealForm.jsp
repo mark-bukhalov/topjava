@@ -2,15 +2,13 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 
-<fmt:setBundle basename="messages.app"/>
-
 <html>
 <jsp:include page="fragments/headTag.jsp"/>
 <body>
 <jsp:include page="fragments/bodyHeader.jsp"/>
 <section>
-    <h2><spring:message code="meal.title.create"/></h2>
-    <form method="post" action="meals/create">
+    <h2><spring:message code="${meal.isNew() ? 'meal.title.create' : 'meal.title.update'}"/></h2>
+    <form method="post" action="${meal.isNew() ? 'meals/create' : 'meals/update'}">
         <input type="hidden" name="id" value="${meal.id}">
         <dl>
             <dt><spring:message code="meal.field.date"/></dt>

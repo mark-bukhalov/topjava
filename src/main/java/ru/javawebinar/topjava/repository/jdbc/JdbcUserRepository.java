@@ -28,7 +28,7 @@ public class JdbcUserRepository implements UserRepository {
 
     private static final BeanPropertyRowMapper<User> ROW_MAPPER = BeanPropertyRowMapper.newInstance(User.class);
 
-    private static final UserWithRolesMapper USER_WITH_ROLES_MAPPER = new UserWithRolesMapper();
+    private static final UserWithRolesExtractor USER_WITH_ROLES_EXTRACTOR = new UserWithRolesExtractor();
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -39,7 +39,7 @@ public class JdbcUserRepository implements UserRepository {
     private final ModelValidator validator;
 
     //    https://krishaniindrachapa.medium.com/get-results-from-join-queries-using-result-extractor-069afc4d792b
-    private static class UserWithRolesMapper implements ResultSetExtractor<List<User>> {
+    private static class UserWithRolesExtractor implements ResultSetExtractor<List<User>> {
         @Override
         public List<User> extractData(ResultSet rs) throws SQLException, DataAccessException {
             Map<Integer, User> userMap = new LinkedHashMap<>();
@@ -55,7 +55,7 @@ public class JdbcUserRepository implements UserRepository {
                     if (newStringRole != null) {
                         user.setRoles(Set.of(Role.valueOf(newStringRole)));
                     } else {
-                        user.setRoles(Collections.EMPTY_SET);
+                        user.setRoles(Collections.emptySet());
                     }
                     userMap.put(user.getId(), user);
                 }
@@ -78,7 +78,7 @@ public class JdbcUserRepository implements UserRepository {
     @Transactional
     @Override
     public User save(User user) {
-        validator.violations(user);
+        validator.validate(user);
 
         BeanPropertySqlParameterSource parameterSource = new BeanPropertySqlParameterSource(user);
 
@@ -94,8 +94,10 @@ public class JdbcUserRepository implements UserRepository {
             jdbcTemplate.update("DELETE FROM user_role where user_id =?", user.getId());
         }
 
-        if (!user.getRoles().isEmpty()) {
-            Iterator<Role> iterator = user.getRoles().iterator();
+        Set<Role> roles = user.getRoles();
+
+        if (!roles.isEmpty()) {
+            Iterator<Role> iterator = roles.iterator();
             jdbcTemplate.batchUpdate("""
                        INSERT INTO user_role(user_id, role) VALUES (?,?)
                     """, new BatchPreparedStatementSetter() {
@@ -107,7 +109,7 @@ public class JdbcUserRepository implements UserRepository {
 
                 @Override
                 public int getBatchSize() {
-                    return user.getRoles().size();
+                    return roles.size();
                 }
             });
         }
@@ -127,7 +129,7 @@ public class JdbcUserRepository implements UserRepository {
                              FROM users
                         LEFT JOIN user_role on users.id = user_role.user_id
                             WHERE id=? """,
-                USER_WITH_ROLES_MAPPER, id);
+                USER_WITH_ROLES_EXTRACTOR, id);
         return DataAccessUtils.singleResult(users);
     }
 
@@ -138,7 +140,7 @@ public class JdbcUserRepository implements UserRepository {
                              FROM users
                         LEFT JOIN user_role on users.id = user_role.user_id
                             WHERE email=? """,
-                USER_WITH_ROLES_MAPPER, email);
+                USER_WITH_ROLES_EXTRACTOR, email);
         return DataAccessUtils.singleResult(users);
     }
 
@@ -149,6 +151,6 @@ public class JdbcUserRepository implements UserRepository {
                              FROM users
                         LEFT JOIN user_role on users.id = user_role.user_id    
                          ORDER BY name, email""",
-                USER_WITH_ROLES_MAPPER);
+                USER_WITH_ROLES_EXTRACTOR);
     }
 }

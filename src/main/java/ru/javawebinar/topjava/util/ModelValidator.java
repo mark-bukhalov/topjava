@@ -12,10 +12,10 @@ import java.util.Set;
 public class ModelValidator {
     private static final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
-    public <T> void violations(T model) {
-        Set<ConstraintViolation<T>> validate = validator.validate(model);
-        if (!validate.isEmpty()) {
-            throw new ConstraintViolationException(validate);
+    public <T> void validate (T model) {
+        Set<ConstraintViolation<T>> violations = validator.validate(model);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
         }
     }
 }

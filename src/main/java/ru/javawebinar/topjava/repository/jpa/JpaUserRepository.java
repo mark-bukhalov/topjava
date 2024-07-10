@@ -8,9 +8,7 @@ import ru.javawebinar.topjava.repository.UserRepository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 @Repository
 @Transactional(readOnly = true)
@@ -61,10 +59,9 @@ public class JpaUserRepository implements UserRepository {
 
     @Override
     public User getByEmail(String email) {
-        Set<User> users = new LinkedHashSet(em.createNamedQuery(User.BY_EMAIL, User.class)
+        return DataAccessUtils.uniqueResult(em.createNamedQuery(User.BY_EMAIL, User.class)
                 .setParameter(1, email)
                 .getResultList());
-        return DataAccessUtils.singleResult(users);
     }
 
     @Override

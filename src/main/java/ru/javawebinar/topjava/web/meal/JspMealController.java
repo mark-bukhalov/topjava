@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.service.MealService;
-import ru.javawebinar.topjava.web.SecurityUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
@@ -18,7 +17,6 @@ import java.util.Objects;
 
 import static ru.javawebinar.topjava.util.DateTimeUtil.parseLocalDate;
 import static ru.javawebinar.topjava.util.DateTimeUtil.parseLocalTime;
-import static ru.javawebinar.topjava.util.ValidationUtil.assureIdConsistent;
 
 @Controller
 @RequestMapping("/meals")
@@ -46,7 +44,7 @@ public class JspMealController extends AbstractMealController {
     }
 
     @GetMapping("/delete")
-    public String delete(HttpServletRequest request, Model model) {
+    public String delete(HttpServletRequest request) {
         int id = getId(request);
         super.delete(id);
         return "redirect:/meals";
@@ -56,17 +54,15 @@ public class JspMealController extends AbstractMealController {
     public String getCreateForm(Model model) {
         Meal meal = new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 1000);
         model.addAttribute("meal", meal);
-        return "createMealForm";
+        return "mealForm";
     }
 
     @GetMapping("/update")
     public String getUpdateForm(HttpServletRequest request, Model model) {
         int id = getId(request);
-        int userId = SecurityUtil.authUserId();
-        Meal meal = service.get(id, userId);
-        assureIdConsistent(meal, id);
+        Meal meal = get(id);
         model.addAttribute("meal", meal);
-        return "updateMealForm";
+        return "mealForm";
     }
 
     @PostMapping("/create")

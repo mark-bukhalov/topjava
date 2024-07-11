@@ -19,7 +19,7 @@ import java.util.List;
 
 @Repository
 @Transactional(readOnly = true)
-public class JdbcMealRepository<T> implements MealRepository {
+public class JdbcMealRepository implements MealRepository {
 
     private static final RowMapper<Meal> ROW_MAPPER = BeanPropertyRowMapper.newInstance(Meal.class);
 

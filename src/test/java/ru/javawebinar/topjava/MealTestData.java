@@ -39,6 +39,10 @@ public class MealTestData {
             MealsUtil.createTo(meal2, false),
             MealsUtil.createTo(meal1, false)
     );
+    public static final List<MealTo> betweenMealsTo = List.of(
+            MealsUtil.createTo(meal2, false),
+            MealsUtil.createTo(meal1, false)
+    );
 
     public static Meal getNew() {
         return new Meal(null, of(2020, Month.FEBRUARY, 1, 18, 0), "Созданный ужин", 300);

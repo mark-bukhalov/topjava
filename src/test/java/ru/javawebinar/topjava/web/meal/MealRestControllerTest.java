@@ -66,7 +66,7 @@ public class MealRestControllerTest extends AbstractControllerTest {
     @Test
     void update() throws Exception {
         Meal forUpdateMeal = MealTestData.getUpdated();
-        ResultActions actions = perform(MockMvcRequestBuilders.put(REST_URL + forUpdateMeal.getId())
+        perform(MockMvcRequestBuilders.put(REST_URL + forUpdateMeal.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(JsonUtil.writeValue(forUpdateMeal)))
                 .andDo(print())
@@ -86,10 +86,11 @@ public class MealRestControllerTest extends AbstractControllerTest {
 
     @Test
     void getBetween() throws Exception {
-        Meal forUpdateMeal = MealTestData.getUpdated();
-        ResultActions actions = perform(MockMvcRequestBuilders.get(REST_URL + "between")
-                .param("startDateTime", "2020-01-30T08:00:00")
-                .param("endDateTime", "2020-01-30T15:00:00"))
+        perform(MockMvcRequestBuilders.get(REST_URL + "between")
+                .param("startDate", "2020-01-30")
+                .param("startTime", "08:00:00")
+                .param("endDate", "2020-01-30")
+                .param("endTime", "15:00:00"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(MEAL_TO_MATCHER.contentJson(betweenMealsTo));

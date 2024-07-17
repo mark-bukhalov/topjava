@@ -77,7 +77,7 @@ public class MealRestControllerTest extends AbstractControllerTest {
 
     @Test
     void delete() throws Exception {
-        ResultActions actions = perform(MockMvcRequestBuilders.delete(REST_URL + meal3.getId()))
+        perform(MockMvcRequestBuilders.delete(REST_URL + meal3.getId()))
                 .andDo(print())
                 .andExpect(status().isNoContent());
 

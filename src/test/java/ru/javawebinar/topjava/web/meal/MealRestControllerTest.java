@@ -22,10 +22,10 @@ import static ru.javawebinar.topjava.UserTestData.USER_ID;
 
 public class MealRestControllerTest extends AbstractControllerTest {
 
+    private static final String REST_URL = MealRestController.REST_URL + '/';
+
     @Autowired
     private MealService service;
-
-    private static final String REST_URL = MealRestController.REST_URL + '/';
 
     @Test
     void getAll() throws Exception {

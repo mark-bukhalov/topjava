@@ -8,10 +8,13 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import ru.javawebinar.topjava.MealTestData;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.service.MealService;
+import ru.javawebinar.topjava.util.MealsUtil;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 import ru.javawebinar.topjava.web.AbstractControllerTest;
 import ru.javawebinar.topjava.web.SecurityUtil;
 import ru.javawebinar.topjava.web.json.JsonUtil;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -94,5 +97,19 @@ public class MealRestControllerTest extends AbstractControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(MEAL_TO_MATCHER.contentJson(betweenMealsTo));
+    }
+
+    @Test
+    void getBetweenWithNullParam() throws Exception {
+        perform(MockMvcRequestBuilders.get(REST_URL + "between")
+                .param("startTime", "08:00:00")
+                .param("endDate", "2020-01-30"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(MEAL_TO_MATCHER.contentJson(List.of(
+                        MealsUtil.createTo(meal3, false),
+                        MealsUtil.createTo(meal2, false),
+                        MealsUtil.createTo(meal1, false)
+                )));
     }
 }

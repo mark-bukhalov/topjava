@@ -4,7 +4,11 @@ const mealAjaxUrl = "profile/meals/";
 const ctx = {
     ajaxUrl: mealAjaxUrl,
     updateTable: function () {
-        $.get(mealAjaxUrl, updateTableByData);
+        $.ajax({
+            type: "GET",
+            url: mealAjaxUrl + "filter",
+            data: $("#filter").serialize()
+        }).done(updateTableByData);
     }
 };
 
@@ -14,44 +18,42 @@ function clearFilter() {
 }
 
 $(function () {
-    makeEditable(
-        $("#datatable").DataTable({
-            "ajax": {
-                "url": mealAjaxUrl,
-                "dataSrc": ""
-            },
-            "paging": false,
-            "info": true,
-            "columns": [
-                {
-                    "data": "dateTime"
-                },
-                {
-                    "data": "description"
-                },
-                {
-                    "data": "calories"
-                },
-                {
-                    "defaultContent": "Edit",
-                    "orderable": false,
-                    "render": renderEditBtn
-                },
-                {
-                    "defaultContent": "Delete",
-                    "orderable": false,
-                    "render": renderDeleteBtn
+    makeEditable({
+        "columns": [
+            {
+                "data": "dateTime",
+                "render": function (date, type, row) {
+                    if (type === 'display') {
+                        return date.replace('T', ' ').substr(0, 16);
+                    }
+                    return date;
                 }
-            ],
-            "order": [
-                [
-                    0,
-                    "desc"
-                ]
-            ],
-            "createdRow": function (row, data, dataIndex) {
-                $(row).attr("data-meal-excess", data.excess);
+            },
+            {
+                "data": "description"
+            },
+            {
+                "data": "calories"
+            },
+            {
+                "render": renderEditBtn,
+                "defaultContent": "",
+                "orderable": false
+            },
+            {
+                "render": renderDeleteBtn,
+                "defaultContent": "",
+                "orderable": false
             }
-        })
-    );
+        ],
+        "order": [
+            [
+                0,
+                "desc"
+            ]
+        ],
+        "createdRow": function (row, data, dataIndex) {
+            $(row).attr("data-meal-excess", data.excess);
+        }
+    });
 });

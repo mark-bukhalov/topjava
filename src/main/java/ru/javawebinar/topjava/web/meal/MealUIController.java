@@ -8,7 +8,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.to.MealTo;
-import ru.javawebinar.topjava.to.MealUpdateTo;
 import ru.javawebinar.topjava.util.ValidationUtil;
 
 import javax.validation.Valid;
@@ -41,14 +40,14 @@ public class MealUIController extends AbstractMealController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseEntity<String> createOrUpdate(@Valid MealUpdateTo mealUpdate, BindingResult result) {
+    public ResponseEntity<String> createOrUpdate(@Valid Meal meal, BindingResult result) {
         if (result.hasErrors()) {
             return ValidationUtil.getErrorResponse(result);
         }
-        if (mealUpdate.isNew()) {
-            super.create(mealUpdate);
+        if (meal.isNew()) {
+            super.create(meal);
         } else {
-            super.update(mealUpdate, mealUpdate.getId());
+            super.update(meal, meal.getId());
         }
         return ResponseEntity.ok().build();
     }

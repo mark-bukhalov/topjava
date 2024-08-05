@@ -7,7 +7,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.validation.BindingResult;
 import ru.javawebinar.topjava.HasId;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
-import ru.javawebinar.topjava.util.exception.PermissionException;
 
 import javax.validation.*;
 import java.util.Set;
@@ -75,12 +74,6 @@ public class ValidationUtil {
     public static Throwable getRootCause(@NonNull Throwable t) {
         Throwable rootCause = NestedExceptionUtils.getRootCause(t);
         return rootCause != null ? rootCause : t;
-    }
-
-    public static void checkIsOwner(int owner, int authUserId) {
-        if (owner != authUserId) {
-            throw new PermissionException();
-        }
     }
 
     public static ResponseEntity<String> getErrorResponse(BindingResult result) {

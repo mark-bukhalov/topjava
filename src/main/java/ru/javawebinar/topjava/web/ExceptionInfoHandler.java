@@ -26,7 +26,8 @@ import static ru.javawebinar.topjava.util.exception.ErrorType.*;
 public class ExceptionInfoHandler {
     private static final Logger log = LoggerFactory.getLogger(ExceptionInfoHandler.class);
 
-    private static final Map<String, String> dbErrorMapping = Map.of("users_unique_email_idx", "User with this email already exists");
+    private static final Map<String, String> dbErrorMapping = Map.of("users_unique_email_idx", "User with this email already exists",
+            "meal_unique_user_datetime_idx", "Meal with this dateTime already exists");
 
     //  http://stackoverflow.com/a/22358422/548473
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -56,7 +57,7 @@ public class ExceptionInfoHandler {
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)  // 422
     @ExceptionHandler(BindException.class)
     public ErrorInfo BindError(HttpServletRequest req, BindException e) {
-        return logAndGetErrorInfo(req, e, false, VALIDATION_ERROR);
+        return logAndGetErrorInfo(req, e, false, VALIDATION_ERROR, e.getBindingResult().getFieldErrors().stream().map(fieldError -> fieldError.getField() + " " + fieldError.getDefaultMessage()).toArray(String[]::new));
     }
 
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)

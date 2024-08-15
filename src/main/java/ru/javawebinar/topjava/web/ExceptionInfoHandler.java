@@ -14,12 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import ru.javawebinar.topjava.util.ValidationUtil;
-import ru.javawebinar.topjava.util.exception.ErrorInfo;
-import ru.javawebinar.topjava.util.exception.ErrorType;
-import ru.javawebinar.topjava.util.exception.IllegalRequestDataException;
-import ru.javawebinar.topjava.util.exception.NotFoundException;
+import ru.javawebinar.topjava.util.exception.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
 
 import static ru.javawebinar.topjava.util.exception.ErrorType.*;
 
@@ -27,6 +25,8 @@ import static ru.javawebinar.topjava.util.exception.ErrorType.*;
 @Order(Ordered.HIGHEST_PRECEDENCE + 5)
 public class ExceptionInfoHandler {
     private static final Logger log = LoggerFactory.getLogger(ExceptionInfoHandler.class);
+
+    private static final Map<String, String> dbErrorMapping = Map.of("users_unique_email_idx", "User with this email already exists");
 
     //  http://stackoverflow.com/a/22358422/548473
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -56,28 +56,29 @@ public class ExceptionInfoHandler {
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)  // 422
     @ExceptionHandler(BindException.class)
     public ErrorInfo BindError(HttpServletRequest req, BindException e) {
-        return logAndGetErrorInfoFromBinding(req, e, false, VALIDATION_ERROR);
+        return logAndGetErrorInfo(req, e, false, VALIDATION_ERROR);
+    }
+
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    @ExceptionHandler(CustomDatabaseException.class)
+    public ErrorInfo dbError(HttpServletRequest req, Exception e) {
+        String message = e.getMessage().toLowerCase();
+        for (Map.Entry<String, String> entry : dbErrorMapping.entrySet()) {
+            if (message.contains(entry.getKey())) {
+                return logAndGetErrorInfo(req, e, true, DATA_ERROR, entry.getValue());
+            }
+        }
+        return logAndGetErrorInfo(req, e, true, DATA_ERROR);
     }
 
     //    https://stackoverflow.com/questions/538870/should-private-helper-methods-be-static-if-they-can-be-static
-    private static ErrorInfo logAndGetErrorInfo(HttpServletRequest req, Exception e, boolean logException, ErrorType errorType) {
+    private static ErrorInfo logAndGetErrorInfo(HttpServletRequest req, Exception e, boolean logException, ErrorType errorType, String... errorMessage) {
         Throwable rootCause = ValidationUtil.getRootCause(e);
         if (logException) {
             log.error(errorType + " at request " + req.getRequestURL(), rootCause);
         } else {
             log.warn("{} at request  {}: {}", errorType, req.getRequestURL(), rootCause.toString());
         }
-        return new ErrorInfo(req.getRequestURL(), errorType, rootCause.toString());
-    }
-
-    private static ErrorInfo logAndGetErrorInfoFromBinding(HttpServletRequest req, BindException e, boolean logException, ErrorType errorType) {
-        Throwable rootCause = ValidationUtil.getRootCause(e);
-        if (logException) {
-            log.error(errorType + " at request " + req.getRequestURL(), rootCause);
-        } else {
-            log.warn("{} at request  {}: {}", errorType, req.getRequestURL(), rootCause.toString());
-        }
-
-        return new ErrorInfo(req.getRequestURL(), errorType, e.getBindingResult().getFieldErrors().stream().map(fieldError -> fieldError.getField() + " " + fieldError.getDefaultMessage()).toArray(String[]::new));
+        return new ErrorInfo(req.getRequestURL(), errorType, errorMessage.length != 0 ? errorMessage : new String[]{rootCause.toString()});
     }
 }

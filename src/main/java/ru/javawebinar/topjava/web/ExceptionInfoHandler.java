@@ -2,6 +2,9 @@ package ru.javawebinar.topjava.web;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -24,10 +27,15 @@ import static ru.javawebinar.topjava.util.exception.ErrorType.*;
 @RestControllerAdvice(annotations = RestController.class)
 @Order(Ordered.HIGHEST_PRECEDENCE + 5)
 public class ExceptionInfoHandler {
+
     private static final Logger log = LoggerFactory.getLogger(ExceptionInfoHandler.class);
 
-    private static final Map<String, String> dbErrorMapping = Map.of("users_unique_email_idx", "User with this email already exists",
-            "meal_unique_user_datetime_idx", "Meal with this dateTime already exists");
+    private static final Map<String, String> dbErrorMapping = Map.of("users_unique_email_idx", "err.dupEmail",
+            "meal_unique_user_datetime_idx", "err.dupDateTime");
+
+
+    @Autowired
+    private MessageSource messageSource;
 
     //  http://stackoverflow.com/a/22358422/548473
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -66,7 +74,7 @@ public class ExceptionInfoHandler {
         String message = e.getMessage().toLowerCase();
         for (Map.Entry<String, String> entry : dbErrorMapping.entrySet()) {
             if (message.contains(entry.getKey())) {
-                return logAndGetErrorInfo(req, e, true, DATA_ERROR, entry.getValue());
+                return logAndGetErrorInfo(req, e, true, DATA_ERROR, messageSource.getMessage(entry.getValue(),null, LocaleContextHolder.getLocale()));
             }
         }
         return logAndGetErrorInfo(req, e, true, DATA_ERROR);

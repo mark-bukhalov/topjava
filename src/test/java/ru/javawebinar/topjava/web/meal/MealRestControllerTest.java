@@ -88,9 +88,22 @@ class MealRestControllerTest extends AbstractControllerTest {
     void updateWithDuplicateDateTime() throws Exception {
         Meal updated = MealTestData.getUpdated();
         updated.setDateTime(meal3.getDateTime());
-        perform(MockMvcRequestBuilders.put(REST_URL + MEAL1_ID).contentType(MediaType.APPLICATION_JSON)
+        perform(MockMvcRequestBuilders.put(REST_URL + MEAL1_ID)
+                .contentType(MediaType.APPLICATION_JSON)
                 .with(userHttpBasic(user))
                 .content(JsonUtil.writeValue(updated)))
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    @Transactional(propagation = Propagation.NEVER)
+    void createWithDuplicateDateTime() throws Exception {
+        Meal newMeal = MealTestData.getNew();
+        newMeal.setDateTime(meal1.getDateTime());
+        ResultActions action = perform(MockMvcRequestBuilders.post(REST_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(userHttpBasic(user))
+                .content(JsonUtil.writeValue(newMeal)))
                 .andExpect(status().isUnprocessableEntity());
     }
 

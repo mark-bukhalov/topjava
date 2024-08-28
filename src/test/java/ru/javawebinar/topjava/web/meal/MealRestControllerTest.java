@@ -96,10 +96,32 @@ class MealRestControllerTest extends AbstractControllerTest {
     }
 
     @Test
+    void updateWithInvalidDescription() throws Exception {
+        Meal updated = MealTestData.getUpdated();
+        updated.setDescription("");
+        perform(MockMvcRequestBuilders.put(REST_URL + MEAL1_ID).contentType(MediaType.APPLICATION_JSON)
+                .with(userHttpBasic(user))
+                .content(JsonUtil.writeValue(updated)))
+                .andDo(print())
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
     @Transactional(propagation = Propagation.NEVER)
     void createWithDuplicateDateTime() throws Exception {
         Meal newMeal = MealTestData.getNew();
         newMeal.setDateTime(meal1.getDateTime());
+        ResultActions action = perform(MockMvcRequestBuilders.post(REST_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(userHttpBasic(user))
+                .content(JsonUtil.writeValue(newMeal)))
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    void createWithInvalidCalories() throws Exception {
+        Meal newMeal = MealTestData.getNew();
+        newMeal.setCalories(10000);
         ResultActions action = perform(MockMvcRequestBuilders.post(REST_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(userHttpBasic(user))
